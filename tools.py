@@ -9,7 +9,8 @@ def main_menu():
         print("1. Port Scanning")
         print("2. Service Version & CVE")
         print("3. RDP Checking")
-        print("4. Exit\n")
+        print("4. Injection Tester (SQLi & LFI)")
+        print("5. Exit\n")
 
         choice = input("Insert Input: ")
 
@@ -33,6 +34,10 @@ def main_menu():
             run_rdp_check()
 
         elif choice == '4':
+            from scanner.injtester import run_injection_tests
+            run_injection_tests()
+
+        elif choice == '5':
             print("\n[!] Exiting... Goodbye!")
             break
 
