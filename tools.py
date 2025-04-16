@@ -9,7 +9,7 @@ def main_menu():
         print("1. Port Scanning")
         print("2. Service Version & CVE")
         print("3. RDP Checking")
-        print("4. Injection Tester (SQLi & LFI)")
+        print("4. DOS Attack")
         print("5. Exit\n")
 
         choice = input("Insert Input: ")
