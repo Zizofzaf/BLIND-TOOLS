@@ -1,5 +1,5 @@
 import os
-from utils.banners import print_banner  # Make sure filename is banners.py
+from utils.banner import print_banner  # Make sure filename is banners.py
 
 def main_menu():
     while True:
