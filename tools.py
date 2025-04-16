@@ -17,7 +17,7 @@ def main_menu():
             from scanner.portscanner import run_port_scan
 
             target = input("Enter target IP address: ""\n")
-            print("1. Scan common ports [1]")
+            print("\n1. Scan common ports [1]")
             print("2. Scan full range [2]")
             scan_type = input("Choose [1] or [2]: ")
             full_scan = scan_type == "2"
