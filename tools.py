@@ -1,5 +1,5 @@
 import os
-from utils.banner import print_banner
+from utils.banners import print_banner  # Make sure filename is banners.py
 
 def main_menu():
     while True:
@@ -15,20 +15,28 @@ def main_menu():
 
         if choice == '1':
             from scanner.portscanner import run_port_scan
-            run_port_scan()
+
+            target = input("Enter target IP address: ")
+            scan_type = input("Scan common ports [1] or full range [2]? ")
+            full_scan = scan_type == "2"
+
+            run_port_scan(target, full_scan)
+
         elif choice == '2':
             from scanner.versioncve import run_version_cve_check
             run_version_cve_check()
+
         elif choice == '3':
             from scanner.rdpchecker import run_rdp_check
             run_rdp_check()
+
         elif choice == '4':
             print("\n[!] Exiting... Goodbye!")
-            break  # Keluar dari while loop dan hentikan program
+            break
+
         else:
             print("\n[!] Invalid Option, please try again!")
 
-        # After each option, wait for the user to press Enter before going back to the main menu
         input("\nPress Enter to return to main menu...")
 
 if __name__ == "__main__":
