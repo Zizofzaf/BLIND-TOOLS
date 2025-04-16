@@ -16,7 +16,7 @@ def main_menu():
         if choice == '1':
             from scanner.portscanner import run_port_scan
 
-            target = input("Enter target IP address: \n")
+            target = input("Enter target IP address: ""\n")
             print("1. Scan common ports [1]")
             print("2. Scan full range [2]")
             scan_type = input("Choose [1] or [2]: ")
