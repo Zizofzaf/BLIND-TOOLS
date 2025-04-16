@@ -1,9 +1,14 @@
-# scanner/portscanner.py
-
 import socket
 from datetime import datetime
 
-# Optional: Boleh pindah ke utils/constants.py kalau banyak
+try:
+    from colorama import init, Fore, Style
+    init(autoreset=True)
+except ImportError:
+    class Dummy:  # fallback if colorama not installed
+        def __getattr__(self, _): return ''
+    Fore = Style = Dummy()
+
 PORT_SERVICES = {
     21: "FTP", 22: "SSH", 23: "Telnet", 25: "SMTP",
     53: "DNS", 80: "HTTP", 110: "POP3", 139: "NetBIOS",
@@ -13,18 +18,20 @@ PORT_SERVICES = {
 COMMON_PORTS = list(PORT_SERVICES.keys())
 
 def run_port_scan(target: str, full_scan: bool = False):
-    """Scan selected ports on a target IP address."""
     ports = range(1, 1025) if full_scan else COMMON_PORTS
     open_ports = []
 
     print(f"\n[+] Scanning ports on {target}...\n")
 
-    # Try resolve hostname
     try:
         hostname = socket.gethostbyaddr(target)[0]
         print(f"[INFO] Hostname: {hostname}")
     except:
         print("[INFO] Hostname: Not found")
+
+    print("\n" + "="*40)
+    print(f"{'PORT':<8} | {'STATUS':<10} | SERVICE")
+    print("-"*40)
 
     start_time = datetime.now()
 
@@ -36,12 +43,11 @@ def run_port_scan(target: str, full_scan: bool = False):
             service = PORT_SERVICES.get(port, "Unknown")
 
             if result == 0:
-                print(f"[OPEN] Port {port} ({service})")
+                status = Fore.GREEN + "OPEN" + Style.RESET_ALL
+                print(f"{port:<8} | {status:<10} | {service}")
                 open_ports.append((port, service))
 
             sock.close()
-            print(f"Scanning port {port} ({index}/{len(ports)})", end='\r')
-
         except KeyboardInterrupt:
             print("\n[!] Scan interrupted by user")
             break
@@ -49,6 +55,7 @@ def run_port_scan(target: str, full_scan: bool = False):
             print(f"[!] Error scanning port {port}: {e}")
 
     end_time = datetime.now()
+    print("="*40)
     duration = end_time - start_time
     print(f"\n[✓] Scan completed in {duration}")
 
